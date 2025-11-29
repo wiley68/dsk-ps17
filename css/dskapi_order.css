@@ -1,0 +1,60 @@
+@font-face {
+    font-family: 'tt_commonsregular_bg';
+    src: url('TypeType - TT Commons Regular.woff2') format('woff2'),
+         url('TypeType - TT Commons Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'tt_commonsbold_bg';
+    src: url('TypeType - TT Commons Bold.woff2') format('woff2'),
+         url('TypeType - TT Commons Bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+/* bnpl checkout */
+.bnpl_title{
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    background:#F5F5F5;
+    padding: 8px 15px 8px 15px;
+    color:#414546;
+    font-family: tt_commonsregular_bg;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    line-height: 21px;
+}
+.bnpl_hr{
+    border-top:0px solid white;
+    border-right:0px solid white;
+    border-bottom:1px solid #DCDCDC;
+    border-left:0px solid white;
+}
+.bnpl_text_cc{
+    text-align:right;
+    font-size:11px;
+}
+.bnpl_wrap_div{
+    padding: 0px 10px;
+    margin-bottom: 5px;
+    color:#EC7423;
+    font-family: tt_commonsregular_bg;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    line-height: 20px;
+    text-align: center;
+}
+.tbi_txt_left_warning{
+    font-family: tt_commonsbold_bg;
+    font-size: 20px;
+    color: #ff2c56;
+}
