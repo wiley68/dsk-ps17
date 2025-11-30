@@ -576,18 +576,35 @@ class Dskpayment extends PaymentModule
             }
         }
         if ('product' === $this->context->controller->php_self) {
-            $this->context->controller->registerStylesheet(
-                'dskapipayment-product-page',
-                'modules/' . $this->name . '/css/dskapi_product.css',
-                [
-                    'media' => 'all',
-                    'priority' => 200,
-                ]
-            );
-            $this->context->controller->registerJavascript(
-                'dskapipayment-product-page-js',
-                'modules/' . $this->name . '/js/dskapi_product.js'
-            );
+            $productJsPath = _PS_MODULE_DIR_ . $this->name . '/js/dskapi_product.js';
+            $productCssPath = _PS_MODULE_DIR_ . $this->name . '/css/dskapi_product.css';
+
+            if (file_exists($productJsPath)) {
+                $jsVersion = filemtime($productJsPath);
+
+                $this->context->controller->registerJavascript(
+                    'module-dskpayment-product-js',
+                    'modules/' . $this->name . '/js/dskapi_product.js',
+                    [
+                        'position' => 'bottom',
+                        'priority' => 300,
+                        'version' => $jsVersion
+                    ]
+                );
+            }
+            if (file_exists($productCssPath)) {
+                $cssVersion = filemtime($productCssPath);
+
+                $this->context->controller->registerStylesheet(
+                    'module-dskpayment-product-css',
+                    'modules/' . $this->name . '/css/dskapi_product.css',
+                    [
+                        'media' => 'all',
+                        'priority' => 200,
+                        'version' => $cssVersion
+                    ]
+                );
+            }
         }
         if ('order' === $this->context->controller->php_self) {
             $this->context->controller->registerStylesheet(
