@@ -493,6 +493,11 @@ namespace {
     class Language
     {
         /**
+         * @var int Language ID
+         */
+        public $id;
+
+        /**
          * Get all languages
          * @param bool $active Only active languages
          * @return array Array of language data
@@ -692,6 +697,11 @@ namespace {
         public $link;
 
         /**
+         * @var Language Language instance
+         */
+        public $language;
+
+        /**
          * Get context instance
          * @return Context
          */
@@ -821,6 +831,19 @@ namespace {
          * @return string
          */
         public function getModuleLink($module, $controller, $params = [], $ssl = false)
+        {
+            return '';
+        }
+
+        /**
+         * Get page link
+         * @param string $controller
+         * @param bool $ssl
+         * @param int $idLang
+         * @param array $params
+         * @return string
+         */
+        public function getPageLink($controller, $ssl = false, $idLang = null, $params = [])
         {
             return '';
         }
