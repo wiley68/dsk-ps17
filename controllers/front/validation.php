@@ -320,7 +320,7 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
 
         $dskapi_add_ch = curl_init();
         curl_setopt_array($dskapi_add_ch, array(
-            CURLOPT_URL => DSKAPI_LIVEURL . '/function/addorders1.php',
+            CURLOPT_URL => DSKAPI_LIVEURL . '/function/addorders.php',
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",

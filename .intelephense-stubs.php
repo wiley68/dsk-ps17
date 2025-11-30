@@ -63,6 +63,234 @@ class PaymentOption
     }
 }
 
+namespace PrestaShop\PrestaShop\Core\Grid\Column\Type;
+
+/**
+ * DataColumn class for PrestaShop Grid system
+ */
+class DataColumn
+{
+    /**
+     * Constructor
+     * @param string $id Column ID
+     */
+    public function __construct($id) {}
+
+    /**
+     * Set column name
+     * @param string $name Column name
+     * @return $this
+     */
+    public function setName($name)
+    {
+        return $this;
+    }
+
+    /**
+     * Set column options
+     * @param array $options Options array
+     * @return $this
+     */
+    public function setOptions(array $options)
+    {
+        return $this;
+    }
+}
+
+namespace PrestaShop\PrestaShop\Core\Grid\Definition;
+
+/**
+ * GridDefinitionInterface for PrestaShop Grid system
+ */
+interface GridDefinitionInterface
+{
+    /**
+     * Get columns collection
+     * @return \PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollectionInterface
+     */
+    public function getColumns();
+}
+
+namespace PrestaShop\PrestaShop\Core\Grid\Column;
+
+/**
+ * ColumnCollectionInterface for PrestaShop Grid system
+ */
+interface ColumnCollectionInterface
+{
+    /**
+     * Add column after specific column
+     * @param string $id Column ID to add after
+     * @param \PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn $column Column to add
+     * @return $this
+     */
+    public function addAfter($id, $column);
+
+    /**
+     * Add column
+     * @param \PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn $column Column to add
+     * @return $this
+     */
+    public function add($column);
+}
+
+namespace Doctrine\DBAL\Query;
+
+/**
+ * QueryBuilder class for Doctrine DBAL
+ */
+class QueryBuilder
+{
+    /**
+     * Add SELECT clause
+     * @param string|array $select Select fields
+     * @return $this
+     */
+    public function addSelect($select)
+    {
+        return $this;
+    }
+
+    /**
+     * Add WHERE condition
+     * @param string $where WHERE condition
+     * @param mixed $value Parameter value
+     * @return $this
+     */
+    public function where($where, $value = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Add AND WHERE condition
+     * @param string $where WHERE condition
+     * @param mixed $value Parameter value
+     * @return $this
+     */
+    public function andWhere($where, $value = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Add OR WHERE condition
+     * @param string $where WHERE condition
+     * @param mixed $value Parameter value
+     * @return $this
+     */
+    public function orWhere($where, $value = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Set parameter value
+     * @param string $key Parameter key
+     * @param mixed $value Parameter value
+     * @return $this
+     */
+    public function setParameter($key, $value)
+    {
+        return $this;
+    }
+
+    /**
+     * Set multiple parameters
+     * @param array $params Parameters array
+     * @return $this
+     */
+    public function setParameters(array $params)
+    {
+        return $this;
+    }
+
+    /**
+     * Add JOIN clause
+     * @param string $fromAlias Alias of the table to join
+     * @param string $join Table name to join
+     * @param string $alias Alias for the joined table
+     * @param string|null $condition Join condition
+     * @return $this
+     */
+    public function leftJoin($fromAlias, $join, $alias, $condition = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Add INNER JOIN clause
+     * @param string $fromAlias Alias of the table to join
+     * @param string $join Table name to join
+     * @param string $alias Alias for the joined table
+     * @param string|null $condition Join condition
+     * @return $this
+     */
+    public function innerJoin($fromAlias, $join, $alias, $condition = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Add ORDER BY clause
+     * @param string $sort Sort field
+     * @param string|null $order Sort order (ASC/DESC)
+     * @return $this
+     */
+    public function orderBy($sort, $order = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Add GROUP BY clause
+     * @param string $groupBy Group by field
+     * @return $this
+     */
+    public function groupBy($groupBy)
+    {
+        return $this;
+    }
+
+    /**
+     * Set maximum number of results
+     * @param int $maxResults Maximum results
+     * @return $this
+     */
+    public function setMaxResults($maxResults)
+    {
+        return $this;
+    }
+
+    /**
+     * Set first result offset
+     * @param int $firstResult First result offset
+     * @return $this
+     */
+    public function setFirstResult($firstResult)
+    {
+        return $this;
+    }
+
+    /**
+     * Get SQL query string
+     * @return string SQL query
+     */
+    public function getSQL()
+    {
+        return '';
+    }
+
+    /**
+     * Execute query and return results
+     * @return array Query results
+     */
+    public function execute()
+    {
+        return [];
+    }
+}
+
 // Return to global namespace for other classes
 namespace {
 
