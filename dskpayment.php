@@ -18,6 +18,8 @@ if (!defined('_PS_VERSION_'))
 defined('DSKAPI_LIVEURL') or define('DSKAPI_LIVEURL', 'https://dsk.avalon-bg.eu');
 defined('DSKAPI_MAIL') or define('DSKAPI_MAIL', 'home@avalonbg.com');
 
+require_once __DIR__ . '/classes/DskPaymentOrder.php';
+
 class Dskpayment extends PaymentModule
 {
     const HOOKS = [
