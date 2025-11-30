@@ -758,6 +758,15 @@ namespace {
         {
             return [];
         }
+
+        /**
+         * Check if cart contains only virtual products
+         * @return bool True if cart is virtual (contains only virtual products)
+         */
+        public function isVirtualCart()
+        {
+            return false;
+        }
     }
 
     /**
@@ -789,6 +798,17 @@ namespace {
          * @var string Email
          */
         public $email;
+
+        /**
+         * @var string Secure key
+         */
+        public $secure_key;
+
+        /**
+         * Constructor
+         * @param int|null $id Customer ID
+         */
+        public function __construct($id = null) {}
 
         /**
          * Get customer addresses
@@ -955,6 +975,68 @@ namespace {
         {
             return $this;
         }
+    }
+
+    /**
+     * Address class for PrestaShop
+     */
+    class Address
+    {
+        /**
+         * @var int Address ID
+         */
+        public $id;
+
+        /**
+         * @var int Customer ID
+         */
+        public $id_customer;
+
+        /**
+         * @var string First name
+         */
+        public $firstname;
+
+        /**
+         * @var string Last name
+         */
+        public $lastname;
+
+        /**
+         * @var string Address line 1
+         */
+        public $address1;
+
+        /**
+         * @var string Address line 2
+         */
+        public $address2;
+
+        /**
+         * @var string City
+         */
+        public $city;
+
+        /**
+         * @var string Postcode
+         */
+        public $postcode;
+
+        /**
+         * @var string Phone
+         */
+        public $phone;
+
+        /**
+         * @var string Phone mobile
+         */
+        public $phone_mobile;
+
+        /**
+         * Constructor
+         * @param int|null $id Address ID
+         */
+        public function __construct($id = null) {}
     }
 
     /**

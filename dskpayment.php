@@ -420,131 +420,172 @@ class Dskpayment extends PaymentModule
 
     public function hookPaymentOptions($params)
     {
-        if (!$this->active)
+        if (!$this->active) {
             return array();
-        if (!$this->checkCurrency($params['cart']))
+        }
+
+        if (empty($params['cart'])) {
             return array();
+        }
+
+        if (!$this->checkCurrency($params['cart'])) {
+            return array();
+        }
+
+        $cart = $params['cart'];
+        if ($cart->isVirtualCart()) {
+            return array();
+        }
 
         $dskapi_status = (int)Configuration::get('dskapi_status');
         if ($dskapi_status == 0)
             return array();
 
         $dskapi_cid = (string)Configuration::get('dskapi_cid');
-        $cart = $this->context->cart;
-        $dskapi_price = floatval($cart->getOrderTotal(true));
-
-        $dskapi_ch = curl_init();
-        curl_setopt($dskapi_ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($dskapi_ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($dskapi_ch, CURLOPT_MAXREDIRS, 2);
-        curl_setopt($dskapi_ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($dskapi_ch, CURLOPT_URL, DSKAPI_LIVEURL . '/function/getminmax.php?cid=' . $dskapi_cid);
-        $paramsdskapi = json_decode(curl_exec($dskapi_ch), true);
-        curl_close($dskapi_ch);
-
-        if (empty($paramsdskapi))
+        if (empty($dskapi_cid)) {
             return array();
+        }
 
-        $dskapi_minstojnost = floatval($paramsdskapi['dsk_minstojnost']);
-        $dskapi_maxstojnost = floatval($paramsdskapi['dsk_maxstojnost']);
-        $dskapi_min_000 = floatval($paramsdskapi['dsk_min_000']);
+        $dskapi_price = (float) $cart->getOrderTotal(true);
+
+        $paramsdskapi = $this->makeApiRequest('/function/getminmax.php?cid=' . urlencode($dskapi_cid));
+        if ($paramsdskapi === null) {
+            return array();
+        }
+
+        $dskapi_minstojnost = (float) $paramsdskapi['dsk_minstojnost'];
+        $dskapi_maxstojnost = (float) $paramsdskapi['dsk_maxstojnost'];
+        $dskapi_min_000 = (float) $paramsdskapi['dsk_min_000'];
         $dskapi_status_cp = $paramsdskapi['dsk_status'];
 
-        $dskapi_purcent = floatval($paramsdskapi['dsk_purcent']);
-        $dskapi_vnoski_default = intval($paramsdskapi['dsk_vnoski_default']);
+        $dskapi_purcent = (float) $paramsdskapi['dsk_purcent'];
+        $dskapi_vnoski_default = (int) $paramsdskapi['dsk_vnoski_default'];
         if (($dskapi_purcent == 0) && ($dskapi_vnoski_default <= 6)) {
             $dskapi_minstojnost = $dskapi_min_000;
         }
 
-        $dskapi_firstname = isset($this->context->customer->firstname) ? trim($this->context->customer->firstname, " ") : '';
-        $dskapi_lastname = isset($this->context->customer->lastname) ? trim($this->context->customer->lastname, " ") : '';
-        $dskapi_addresses = $this->context->customer->getAddresses($this->context->customer->id_lang);
-        $dskapi_address_delivery_id = isset($this->context->cart->id_address_delivery) ? $this->context->cart->id_address_delivery : '';
-        $dskapi_address_invoice_id = isset($this->context->cart->id_address_invoice) ? $this->context->cart->id_address_invoice : '';
-        foreach ($dskapi_addresses as $dskapi_address) {
-            if ($dskapi_address['id_address'] == $dskapi_address_delivery_id) {
-                $dskapi_shipping_addresses = $dskapi_address;
-            }
-            if ($dskapi_address['id_address'] == $dskapi_address_invoice_id) {
-                $dskapi_billing_addresses = $dskapi_address;
-            }
+        if (!$this->context->currency || !$this->context->currency->iso_code) {
+            return array();
         }
-        $dskapi_phone = isset($dskapi_shipping_addresses['phone']) ? $dskapi_shipping_addresses['phone'] : '';
-        $dskapi_email = isset($this->context->customer->email) ? $this->context->customer->email : '';
-        $dskapi_address_address2 = isset($dskapi_shipping_addresses['address2']) ? $dskapi_shipping_addresses['address2'] : '';
-        $dskapi_address2 = $dskapi_address_address2;
-        $dskapi_city = isset($dskapi_shipping_addresses['city']) ? $dskapi_shipping_addresses['city'] : '';
-        $dskapi_address2city = $dskapi_city;
-        $dskapi_address_address1 = isset($dskapi_shipping_addresses['address1']) ? $dskapi_shipping_addresses['address1'] : '';
-        $dskapi_address1 = $dskapi_address_address1;
-        $dskapi_address1city = $dskapi_city;
-        $dskapi_postcode = isset($dskapi_shipping_addresses['postcode']) ? $dskapi_shipping_addresses['postcode'] : '';
 
         $dskapi_eur = 0;
         $dskapi_currency_code = $this->context->currency->iso_code;
-        $dskapi_ch_eur = curl_init();
-        curl_setopt($dskapi_ch_eur, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($dskapi_ch_eur, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($dskapi_ch_eur, CURLOPT_MAXREDIRS, 3);
-        curl_setopt($dskapi_ch_eur, CURLOPT_TIMEOUT, 5);
-        curl_setopt($dskapi_ch_eur, CURLOPT_URL, DSKAPI_LIVEURL . '/function/geteur.php?cid=' . $dskapi_cid);
-        $paramsdskapieur = json_decode(curl_exec($dskapi_ch_eur), true);
+        $paramsdskapieur = $this->makeApiRequest('/function/geteur.php?cid=' . urlencode($dskapi_cid));
+        if ($paramsdskapieur === null) {
+            return array();
+        }
 
-        if ($paramsdskapieur != null) {
-            $dskapi_eur = (int)$paramsdskapieur['dsk_eur'];
-            switch ($dskapi_eur) {
-                case 0:
-                    break;
-                case 1:
-                    if ($dskapi_currency_code == "EUR") {
-                        $dskapi_price = number_format($dskapi_price * 1.95583, 2, ".", "");
-                    }
-                    break;
-                case 2:
-                    $dskapi_sign = "евро";
-                    if ($dskapi_currency_code == "BGN") {
-                        $dskapi_price = number_format($dskapi_price / 1.95583, 2, ".", "");
-                    }
-                    break;
+        $dskapi_eur = (int)$paramsdskapieur['dsk_eur'];
+        switch ($dskapi_eur) {
+            case 0:
+                break;
+            case 1:
+                if ($dskapi_currency_code == "EUR") {
+                    $dskapi_price = (float) number_format($dskapi_price * 1.95583, 2, ".", "");
+                }
+                break;
+            case 2:
+                $dskapi_sign = "евро";
+                if ($dskapi_currency_code == "BGN") {
+                    $dskapi_price = (float) number_format($dskapi_price / 1.95583, 2, ".", "");
+                }
+                break;
+        }
+
+        if (
+            $dskapi_status_cp == 0 ||
+            $dskapi_price < $dskapi_minstojnost ||
+            $dskapi_price > $dskapi_maxstojnost
+        ) {
+            return array();
+        }
+
+        $dskapi_firstname = isset($this->context->customer->firstname) ? trim($this->context->customer->firstname) : '';
+        $dskapi_lastname = isset($this->context->customer->lastname) ? trim($this->context->customer->lastname) : '';
+        $dskapi_email = isset($this->context->customer->email) ? trim($this->context->customer->email) : '';
+
+        $addressDelivery = null;
+        if ($cart->id_address_delivery) {
+            $tmpAddress = new Address((int) $cart->id_address_delivery);
+            if (Validate::isLoadedObject($tmpAddress)) {
+                $addressDelivery = $tmpAddress;
             }
         }
 
-        if (($dskapi_status_cp == 0) || ($dskapi_price < $dskapi_minstojnost) || ($dskapi_price > $dskapi_maxstojnost)) {
-            return array();
-        } else {
-            $this->context->smarty->assign(
-                array(
-                    'dskapi_logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/logo.png')
-                )
-            );
+        $dskapi_phone = '';
+        $dskapi_address1 = '';
+        $dskapi_address1city = '';
+        $dskapi_postcode = '';
 
-            $newOption = new PaymentOption();
-            $newOption->setModuleName($this->name)
-                ->setCallToActionText("Банка ДСК")
-                ->setAction($this->context->link->getModuleLink(
-                    $this->name,
-                    'validation',
-                    array(
-                        "dskapi_firstname" => $dskapi_firstname,
-                        "dskapi_lastname" => $dskapi_lastname,
-                        "dskapi_phone" => $dskapi_phone,
-                        "dskapi_email" => $dskapi_email,
-                        "dskapi_address2" => $dskapi_address2,
-                        "dskapi_address2city" => $dskapi_address2city,
-                        "dskapi_address1" => $dskapi_address1,
-                        "dskapi_address1city" => $dskapi_address1city,
-                        "dskapi_postcode" => $dskapi_postcode,
-                        "dskapi_eur" => $dskapi_eur
-                    ),
-                    true
-                ))
-                ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/logo.png'))
-                ->setAdditionalInformation($this->fetch('module:' . $this->name . '/views/templates/hook/dskapipayment_intro.tpl'));
-            $payment_options = [
-                $newOption,
-            ];
-            return $payment_options;
+        if ($addressDelivery) {
+            $dskapi_phone = trim((string) ($addressDelivery->phone_mobile ?: $addressDelivery->phone ?: ''));
+            $dskapi_address1 = trim((string) $addressDelivery->address1);
+            $dskapi_address1city = trim((string) $addressDelivery->city);
+            $dskapi_postcode = trim((string) $addressDelivery->postcode);
         }
+
+        $invoiceAddress = null;
+        if ($cart->id_address_invoice && $cart->id_address_invoice != $cart->id_address_delivery) {
+            $tmpInvoiceAddress = new Address((int) $cart->id_address_invoice);
+            if (Validate::isLoadedObject($tmpInvoiceAddress)) {
+                $invoiceAddress = $tmpInvoiceAddress;
+            }
+        }
+
+        $dskapi_address2 = $invoiceAddress ? trim((string) $invoiceAddress->address1) : $dskapi_address1;
+        $dskapi_address2city = $invoiceAddress ? trim((string) $invoiceAddress->city) : $dskapi_address1city;
+
+        // Генерираме CSRF token базиран на cart ID и customer secure_key
+        $customer = new Customer($cart->id_customer);
+        $token = md5($cart->id . '_' . ($customer->secure_key ?? '') . '_' . Configuration::get('PS_COOKIE_CHECKSUM'));
+
+        // Генерираме информацията за информативния попъп (използваме същата логика като в cart hook-а)
+        $dskapi_popup_html = '';
+        $dskapi_price_for_popup = (float) $cart->getOrderTotal(true);
+        $dskapi_product_id_for_popup = $this->resolveCartProductId();
+
+        // Генерираме попъпа дори когато има повече продукти (product_id = 0), както в cart hook-а
+        if ($dskapi_price_for_popup > 0) {
+            $popupWidgetHtml = $this->renderDskWidget(
+                $dskapi_price_for_popup,
+                $dskapi_product_id_for_popup,
+                'module:' . $this->name . '/views/templates/hook/dskpayment_checkout_popup.tpl'
+            );
+            if (!empty($popupWidgetHtml)) {
+                $dskapi_popup_html = $popupWidgetHtml;
+            }
+        }
+
+        // Предаваме данните към темплейта за POST форма
+        $this->context->smarty->assign([
+            'dskapi_firstname' => $dskapi_firstname,
+            'dskapi_lastname' => $dskapi_lastname,
+            'dskapi_phone' => $dskapi_phone,
+            'dskapi_email' => $dskapi_email,
+            'dskapi_address2' => $dskapi_address2,
+            'dskapi_address2city' => $dskapi_address2city,
+            'dskapi_address1' => $dskapi_address1,
+            'dskapi_address1city' => $dskapi_address1city,
+            'dskapi_postcode' => $dskapi_postcode,
+            'dskapi_eur' => $dskapi_eur,
+            'dskapi_action' => $this->context->link->getModuleLink(
+                $this->name,
+                'validation',
+                [],
+                true
+            ),
+            'dskapi_logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/dsk_logo.png'),
+            'dskapi_token' => $token,
+            'dskapi_cart_id' => $cart->id,
+            'dskapi_popup_html' => $dskapi_popup_html
+        ]);
+
+        $newOption = new PaymentOption();
+        $newOption->setModuleName($this->name)
+            ->setCallToActionText($this->displayName)
+            ->setAdditionalInformation($this->fetch('module:' . $this->name . '/views/templates/hook/dskpayment_checkout.tpl'));
+
+        return array($newOption);
     }
 
     public function hookActionFrontControllerSetMedia($params)
@@ -635,14 +676,29 @@ class Dskpayment extends PaymentModule
             }
         }
         if ('order' === $this->context->controller->php_self) {
-            $this->context->controller->registerStylesheet(
-                'dskapipayment-order-page',
-                'modules/' . $this->name . '/css/dskapi_order.css',
-                [
-                    'media' => 'all',
-                    'priority' => 200,
-                ]
-            );
+            $checkoutJsPath = _PS_MODULE_DIR_ . $this->name . '/js/dskapi_checkout.js';
+            $checkoutCssPath = _PS_MODULE_DIR_ . $this->name . '/css/dskapi_checkout.css';
+            if (file_exists($checkoutCssPath)) {
+                $this->context->controller->registerStylesheet(
+                    'module-dskpayment-checkout-css',
+                    'modules/' . $this->name . '/css/dskapi_checkout.css',
+                    [
+                        'media' => 'all',
+                        'priority' => 200,
+                        'version' => filemtime($checkoutCssPath)
+                    ]
+                );
+            }
+            if (file_exists($checkoutJsPath)) {
+                $this->context->controller->registerJavascript(
+                    'module-dskpayment-checkout-js',
+                    'modules/' . $this->name . '/js/dskapi_checkout.js',
+                    [
+                        'priority' => 100,
+                        'version' => filemtime($checkoutJsPath)
+                    ]
+                );
+            }
         }
     }
 
