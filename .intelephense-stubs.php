@@ -745,6 +745,19 @@ namespace {
         {
             return 0.0;
         }
+
+        /**
+         * Get products from cart
+         * @param bool $refresh Refresh cart products
+         * @param bool $id_product Get specific product
+         * @param int $id_country Country ID
+         * @param bool $full Get full product details
+         * @return array Array of products
+         */
+        public function getProducts($refresh = false, $id_product = false, $id_country = null, $full = false)
+        {
+            return [];
+        }
     }
 
     /**
