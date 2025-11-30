@@ -1,5 +1,7 @@
 <?php
 
+require_once _PS_MODULE_DIR_ . 'dskpayment/classes/DskapiMail.php';
+
 /**
  * @File: validation.php
  * @Author: Ilko Ivanov
@@ -318,7 +320,7 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
 
         $dskapi_add_ch = curl_init();
         curl_setopt_array($dskapi_add_ch, array(
-            CURLOPT_URL => DSKAPI_LIVEURL . '/function/addorders.php',
+            CURLOPT_URL => DSKAPI_LIVEURL . '/function/addorders1.php',
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
@@ -342,13 +344,12 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
             // Грешка при изпълнение на curl заявката
             DskPaymentOrder::create($order_id, 0);
 
-            Mail::Send(
+            DskapiMail::send(
                 (int) (Configuration::get('PS_LANG_DEFAULT')),
                 'ordersend',
                 'Проблем комуникация заявка КП DSK Credit',
                 [
-                    '{email}' => DSKAPI_MAIL,
-                    '{message}' => 'CURL Error: ' . $curl_error . "\n\n" . json_encode($dskapi_post, JSON_PRETTY_PRINT)
+                    '{message}' => json_encode($dskapi_post, JSON_PRETTY_PRINT)
                 ],
                 DSKAPI_MAIL,
                 null,
@@ -358,6 +359,9 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
                 null,
                 _PS_MODULE_DIR_ . 'dskpayment/mails',
                 false,
+                null,
+                null,
+                null,
                 null
             );
 
@@ -368,13 +372,12 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
             // HTTP код различен от 200
             DskPaymentOrder::create($order_id, 0);
 
-            Mail::Send(
+            DskapiMail::send(
                 (int) (Configuration::get('PS_LANG_DEFAULT')),
                 'ordersend',
                 'Проблем комуникация заявка КП DSK Credit',
                 [
-                    '{email}' => DSKAPI_MAIL,
-                    '{message}' => 'HTTP Error Code: ' . $curl_http_code . "\n\nResponse: " . $curl_response . "\n\n" . json_encode($dskapi_post, JSON_PRETTY_PRINT)
+                    '{message}' => json_encode($dskapi_post, JSON_PRETTY_PRINT)
                 ],
                 DSKAPI_MAIL,
                 null,
@@ -384,6 +387,9 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
                 null,
                 _PS_MODULE_DIR_ . 'dskpayment/mails',
                 false,
+                null,
+                null,
+                null,
                 null
             );
 
@@ -408,13 +414,12 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
             DskPaymentOrder::create($order_id, 0);
 
             if (empty($paramsdskapiadd)) {
-                Mail::Send(
+                DskapiMail::send(
                     (int) (Configuration::get('PS_LANG_DEFAULT')),
                     'ordersend',
                     'Проблем комуникация заявка КП DSK Credit',
                     [
-                        '{email}' => DSKAPI_MAIL,
-                        '{message}' => 'Empty response from API' . "\n\n" . json_encode($dskapi_post, JSON_PRETTY_PRINT)
+                        '{message}' => json_encode($dskapi_post, JSON_PRETTY_PRINT)
                     ],
                     DSKAPI_MAIL,
                     null,
@@ -424,6 +429,9 @@ class DskpaymentValidationModuleFrontController extends ModuleFrontController
                     null,
                     _PS_MODULE_DIR_ . 'dskpayment/mails',
                     false,
+                    null,
+                    null,
+                    null,
                     null
                 );
 

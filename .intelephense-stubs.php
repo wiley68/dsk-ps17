@@ -422,11 +422,26 @@ namespace {
          * Get a configuration value
          * @param string $key
          * @param mixed $default
+         * @param int|null $idShopGroup
+         * @param int|null $idShop
          * @return mixed
          */
-        public static function get($key, $default = null)
+        public static function get($key, $default = null, $idShopGroup = null, $idShop = null)
         {
             return $default;
+        }
+
+        /**
+         * Get multiple configuration values
+         * @param array $keys Array of configuration keys
+         * @param int|null $idLang Language ID
+         * @param int|null $idShopGroup Shop group ID
+         * @param int|null $idShop Shop ID
+         * @return array Array of configuration values
+         */
+        public static function getMultiple($keys, $idLang = null, $idShopGroup = null, $idShop = null)
+        {
+            return [];
         }
 
         /**
@@ -459,6 +474,27 @@ namespace {
         const CONTEXT_ALL = 1;
         const CONTEXT_GROUP = 2;
         const CONTEXT_SHOP = 3;
+
+        /**
+         * @var int Shop ID
+         */
+        public $id;
+
+        /**
+         * @var string Physical URI
+         */
+        public $physical_uri;
+
+        /**
+         * @var string Theme name
+         */
+        public $theme;
+
+        /**
+         * Constructor
+         * @param int|null $id Shop ID
+         */
+        public function __construct($id = null) {}
 
         /**
          * Check if shop feature is active
@@ -707,6 +743,48 @@ namespace {
          * @return void
          */
         public static function redirect($url) {}
+
+        /**
+         * Convert string to lowercase
+         * @param string $str
+         * @return string
+         */
+        public static function strtolower($str)
+        {
+            return '';
+        }
+
+        /**
+         * Get file contents
+         * @param string $filename
+         * @return string|false
+         */
+        public static function file_get_contents($filename)
+        {
+            return '';
+        }
+
+        /**
+         * Safe output (escape HTML)
+         * @param string $string
+         * @return string
+         */
+        public static function safeOutput($string)
+        {
+            return '';
+        }
+
+        /**
+         * Substring
+         * @param string $str
+         * @param int $start
+         * @param int|null $length
+         * @return string
+         */
+        public static function substr($str, $start, $length = null)
+        {
+            return '';
+        }
     }
 
     /**
@@ -733,6 +811,56 @@ namespace {
         {
             return false;
         }
+
+        /**
+         * Check if value is valid email
+         * @param string $email
+         * @return bool
+         */
+        public static function isEmail($email)
+        {
+            return false;
+        }
+
+        /**
+         * Check if value is valid mail name
+         * @param string $name
+         * @return bool
+         */
+        public static function isMailName($name)
+        {
+            return false;
+        }
+
+        /**
+         * Check if value is valid template name
+         * @param string $name
+         * @return bool
+         */
+        public static function isTplName($name)
+        {
+            return false;
+        }
+
+        /**
+         * Check if value is valid mail subject
+         * @param string $subject
+         * @return bool
+         */
+        public static function isMailSubject($subject)
+        {
+            return false;
+        }
+
+        /**
+         * Check if value is valid generic name
+         * @param string $name
+         * @return bool
+         */
+        public static function isGenericName($name)
+        {
+            return false;
+        }
     }
 
     /**
@@ -753,6 +881,16 @@ namespace {
         public static function getLanguages($active = true)
         {
             return [];
+        }
+
+        /**
+         * Get ISO code by language ID
+         * @param int $idLang Language ID
+         * @return string|false ISO code or false
+         */
+        public static function getIsoById($idLang)
+        {
+            return '';
         }
     }
 
@@ -936,10 +1074,105 @@ namespace {
     }
 
     /**
+     * MailCore base class for PrestaShop mail
+     */
+    class MailCore
+    {
+        /**
+         * Mail type constants
+         */
+        const TYPE_BOTH = 0;
+        const TYPE_TEXT = 1;
+        const TYPE_HTML = 2;
+
+        /**
+         * Mail method constants
+         */
+        const METHOD_DISABLE = 0;
+        const METHOD_SMTP = 1;
+        const METHOD_MAIL = 2;
+
+        /**
+         * Die or log error
+         * @param bool $die Die on error
+         * @param string $message Error message
+         * @param array $args Message arguments
+         * @return void
+         */
+        protected static function dieOrLog($die, $message, $args = []) {}
+
+        /**
+         * MIME encode string
+         * @param string $str String to encode
+         * @return string Encoded string
+         */
+        protected static function mimeEncode($str)
+        {
+            return $str;
+        }
+
+        /**
+         * Convert email to punycode
+         * @param string $email Email address
+         * @return string Punycode email
+         */
+        protected static function toPunycode($email)
+        {
+            return $email;
+        }
+
+        /**
+         * Get template base path
+         * @param string $template Template name
+         * @param string|false $moduleName Module name
+         * @param string|null $theme Theme name
+         * @return string Template path
+         */
+        protected static function getTemplateBasePath($template, $moduleName = false, $theme = null)
+        {
+            return '';
+        }
+
+        /**
+         * Generate message ID
+         * @return string Message ID
+         */
+        public static function generateId()
+        {
+            return '';
+        }
+    }
+
+    /**
      * Mail class for PrestaShop
      */
-    class Mail
+    class Mail extends MailCore
     {
+        /**
+         * @var string Template name
+         */
+        public $template;
+
+        /**
+         * @var string Subject
+         */
+        public $subject;
+
+        /**
+         * @var int Language ID
+         */
+        public $id_lang;
+
+        /**
+         * @var int|null Mail ID
+         */
+        public $id;
+
+        /**
+         * @var string Recipient email
+         */
+        public $recipient;
+
         /**
          * Send email
          * @param int $idLang Language ID
@@ -959,6 +1192,46 @@ namespace {
          * @return bool
          */
         public static function Send($idLang, $template, $subject, $templateVars, $to, $toName = '', $from = null, $fromName = null, $fileAttachment = null, $modeSMTP = null, $templatePath = _PS_MAIL_DIR_, $die = false, $idShop = null, $bcc = null)
+        {
+            return true;
+        }
+
+        /**
+         * Add mail to database
+         * @return bool
+         */
+        public function add()
+        {
+            return true;
+        }
+    }
+
+    /**
+     * DskapiMail class - extends MailCore for plain text JSON emails
+     */
+    class DskapiMail extends MailCore
+    {
+        /**
+         * Send email (plain text only, no subject prefix)
+         * @param int $idLang Language ID
+         * @param string $template Template name
+         * @param string $subject Subject
+         * @param array $templateVars Template variables
+         * @param string $to To email
+         * @param string|null $toName To name
+         * @param string|null $from From email
+         * @param string|null $fromName From name
+         * @param string|null $fileAttachment File attachment path
+         * @param bool|null $mode_smtp SMTP mode
+         * @param string $templatePath Template path
+         * @param bool $die Die on error
+         * @param int|null $idShop Shop ID
+         * @param string|null $bcc BCC email
+         * @param string|null $replyTo Reply to email
+         * @param string|null $replyToName Reply to name
+         * @return bool
+         */
+        public static function send($idLang, $template, $subject, $templateVars, $to, $toName = null, $from = null, $fromName = null, $fileAttachment = null, $mode_smtp = null, $templatePath = _PS_MAIL_DIR_, $die = false, $idShop = null, $bcc = null, $replyTo = null, $replyToName = null)
         {
             return true;
         }
@@ -1005,12 +1278,26 @@ namespace {
         public $language;
 
         /**
+         * @var Shop Shop instance
+         */
+        public $shop;
+
+        /**
          * Get context instance
          * @return Context
          */
         public static function getContext()
         {
             return new self();
+        }
+
+        /**
+         * Get translator instance
+         * @return object Translator instance
+         */
+        public function getTranslator()
+        {
+            return new stdClass();
         }
     }
 
@@ -1259,11 +1546,13 @@ namespace {
          * Get page link
          * @param string $controller
          * @param bool $ssl
-         * @param int $idLang
-         * @param array $params
+         * @param bool $withId
+         * @param int|null $idLang
+         * @param array|null $params
+         * @param bool|int|null $idShop Shop ID
          * @return string
          */
-        public function getPageLink($controller, $ssl = false, $idLang = null, $params = [])
+        public function getPageLink($controller, $ssl = false, $withId = true, $idLang = null, $params = null, $idShop = false)
         {
             return '';
         }
@@ -1449,10 +1738,151 @@ namespace {
         return $string;
     }
 
+    /**
+     * Hook management class
+     */
+    class Hook
+    {
+        /**
+         * Execute hook
+         * @param string $hookName Hook name
+         * @param array $params Parameters
+         * @param int|null $idModule Module ID
+         * @param bool $arrayReturn Return array
+         * @return mixed Hook result
+         */
+        public static function exec($hookName, $params = [], $idModule = null, $arrayReturn = false)
+        {
+            return null;
+        }
+    }
+
+    /**
+     * PrestaShop Logger class
+     */
+    class PrestaShopLogger
+    {
+        /**
+         * Add log entry
+         * @param string $message Log message
+         * @param int $severity Severity level
+         * @param int|null $errorCode Error code
+         * @param string|null $objectType Object type
+         * @param int|null $objectId Object ID
+         * @param bool $allowDuplicate Allow duplicate entries
+         * @param int|null $idShop Shop ID
+         * @return void
+         */
+        public static function addLog($message, $severity = 1, $errorCode = null, $objectType = null, $objectId = null, $allowDuplicate = false, $idShop = null) {}
+    }
+
+    /**
+     * ShopUrl class for URL management
+     */
+    class ShopUrl
+    {
+        /**
+         * Cache main domain for shop
+         * @param int $idShop Shop ID
+         * @return void
+         */
+        public static function cacheMainDomainForShop($idShop) {}
+
+        /**
+         * Reset main domain cache
+         * @return void
+         */
+        public static function resetMainDomainCache() {}
+    }
+
+    /**
+     * SwiftMailer classes (placeholders)
+     */
+    class Swift_Message
+    {
+        public function setSubject($subject) {}
+        public function setCharset($charset) {}
+        public function setId($id) {}
+        public function setReplyTo($email, $name = null) {}
+        public function setFrom($email, $name = null) {}
+        public function addTo($email, $name = null) {}
+        public function addBcc($email) {}
+        public function setBody($body, $contentType = null) {}
+        public function attach($attachment) {}
+        public function getSubject()
+        {
+            return '';
+        }
+        public function getTo()
+        {
+            return [];
+        }
+        public function getCc()
+        {
+            return [];
+        }
+        public function getBcc()
+        {
+            return [];
+        }
+    }
+
+    class Swift_SmtpTransport
+    {
+        public function __construct($host, $port, $encryption = null) {}
+        public function setUsername($username)
+        {
+            return $this;
+        }
+        public function setPassword($password)
+        {
+            return $this;
+        }
+    }
+
+    class Swift_SendmailTransport
+    {
+        public function __construct() {}
+    }
+
+    class Swift_Mailer
+    {
+        public function __construct($transport) {}
+        public function registerPlugin($plugin) {}
+        public function send($message)
+        {
+            return true;
+        }
+    }
+
+    class Swift_Attachment
+    {
+        public function setFilename($filename)
+        {
+            return $this;
+        }
+        public function setContentType($contentType)
+        {
+            return $this;
+        }
+        public function setBody($body)
+        {
+            return $this;
+        }
+    }
+
+    class Swift_Plugins_DecoratorPlugin
+    {
+        public function __construct($replacements) {}
+    }
+
+    class Swift_SwiftException extends Exception {}
+
     // PrestaShop constants
     define('_PS_VERSION_', '1.7.8.0');
     define('_PS_MODULE_DIR_', '/var/www/presta17.avalonbg.com/modules/');
     define('_PS_MAIL_DIR_', '/var/www/presta17.avalonbg.com/mails/');
+    define('_PS_IMG_DIR_', '/var/www/presta17.avalonbg.com/img/');
     define('_DB_PREFIX_', 'ps_');
     define('_MYSQL_ENGINE_', 'InnoDB');
 } // End of global namespace
