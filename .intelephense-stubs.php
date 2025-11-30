@@ -1730,10 +1730,33 @@ namespace {
         public $context;
 
         /**
+         * @var bool AJAX mode flag
+         */
+        public $ajax = false;
+
+        /**
          * Post process method
          * @return void
          */
         public function postProcess() {}
+
+        /**
+         * Initialize content
+         * @return void
+         */
+        public function initContent() {}
+
+        /**
+         * Initialize header
+         * @return void
+         */
+        public function initHeader() {}
+
+        /**
+         * Display AJAX response
+         * @return void
+         */
+        public function displayAjax() {}
     }
 
     /**
